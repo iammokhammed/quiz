@@ -10,9 +10,9 @@ from account.models import Account
 from account.serializers import AccountSerializer
 from django.db.models import Q
 from django.utils import timezone
-from django.db.models import Count
-from datetime import datetime, timedelta
-from django.db.models.functions import TruncWeek, TruncDay, TruncMonth
+# from django.db.models import Count
+# from datetime import datetime, timedelta
+# from django.db.models.functions import TruncWeek, TruncDay, TruncMonth
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.validators import ValidationError
