@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Question, Option, Result
+from .models import Category, Question, Option, Result, Contact
 
 
 @admin.register(Category)
@@ -30,3 +30,8 @@ class ResultAdmin(admin.ModelAdmin):
 
     def get_questions(self, obj):
         return ", ".join([question.question for question in obj.questions.all()])
+
+
+@admin.register(Contact)
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'email', 'message')

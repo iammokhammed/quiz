@@ -36,6 +36,7 @@ class QuestionListAPIView(generics.ListAPIView):  # quesiton list with filtered 
         if category_id:
             qs = qs.filter(category_id=category_id).order_by('?')[:5]
             return qs
+        print(66666, qs)
         return HttpResponseNotFound('Not found!')
 
 
@@ -67,6 +68,27 @@ class AnswerFromStudentPostAPIView(APIView):
                 ),
             },
             required=['category_id', 'questions'],
+            example={
+                "category_id": 1,
+                "questions": [
+                    {
+                        "question_id": 11,
+                        "option_id": 1
+                    },
+                    {
+                        "question_id": 12,
+                        "option_id": 1
+                    },
+                    {
+                        "question_id": 13,
+                        "option_id": 1
+                    }
+                    # {
+                    #     "question_id": 7,
+                    #     "option_id": 1
+                    # }
+                ]
+            }
         )
     )
     def post(self, request):
@@ -76,6 +98,23 @@ class AnswerFromStudentPostAPIView(APIView):
         category_id = self.request.data.get('category_id')
         questions = self.request.data.get('questions')
 
+        unique_question_ids = set()
+        unique_option_ids = set()
+        unique_questions = []
+
+        for item in questions:
+            question_id = item['question_id']
+            option_id = item['option_id']
+
+            if question_id in unique_question_ids:
+                return Response({"message": "unique question_id required. Don't input duplicates!"})
+            if option_id in unique_option_ids:
+                return Response({"message": "unique option_id required. Don't input duplicates!"})
+
+            unique_question_ids.add(question_id)
+            unique_option_ids.add(option_id)
+            unique_questions.append(item)
+
         try:
             Category.objects.get(id=category_id)
         except Category.DoesNotExist:
@@ -83,7 +122,7 @@ class AnswerFromStudentPostAPIView(APIView):
         result = Result.objects.create(account_id=account.id, category_id=category_id)
 
         j = 0
-        for i in questions:
+        for i in unique_questions:
             question_id = int(i.get('question_id'))
             option_id = int(i.get('option_id'))
             try:
@@ -166,6 +205,8 @@ class AverageStatisticByAccountListAPIView(APIView):
 
 
 class TimeStatisticListAPIView(APIView):
+        # http://127.0.0.1:8000/quiz/day_statistic/?start_date=2023-05-29&end_date=2023-06-05
+
     def get(self, request):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
@@ -181,14 +222,14 @@ class TimeStatisticListAPIView(APIView):
 
         category_stats = Result.objects.filter(created_date__range=(start_date, end_date)).values_list('category')\
             .annotate(attempts=models.Count('id'), total_result=models.Avg('result'))\
-            .values('category__title', 'account__username', 'attempts', 'total_result')
+            .values('category__title', 'account__email', 'attempts', 'total_result')
 
         statistics = []
 
         for category in category_stats:
             category_info = {
                 'category': category['category__title'],
-                'account': category["account__username"],
+                'account': category["account__email"],
                 'attempts': category['attempts'],
                 'total_result': category['total_result']
             }
