@@ -83,10 +83,10 @@ class AnswerFromStudentPostAPIView(APIView):
                         "question_id": 13,
                         "option_id": 1
                     }
-                    # {
-                    #     "question_id": 7,
-                    #     "option_id": 1
-                    # }
+                    {
+                        "question_id": 7,
+                        "option_id": 1
+                    }
                 ]
             }
         )
